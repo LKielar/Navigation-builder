@@ -1,6 +1,7 @@
 import { PropsWithChildren } from "react";
 
 const baseStyles = `flex items-center gap-[6px] font-semibold text-sm py-[10px] px-4 border border-solid rounded-md whitespace-nowrap transition hover:bg-opacity-95 w-fit shadow-sm`;
+
 const variants = {
   primary:
     "text-button-primary-fg bg-button-primary-bg border-button-primary-border",
@@ -15,6 +16,7 @@ type ButtonProps = {
   icon?: React.ReactNode;
   additionalClasses?: string;
   disabled?: boolean;
+  ref?: (node: HTMLElement | null) => void;
 };
 
 const Button = ({
@@ -24,6 +26,8 @@ const Button = ({
   additionalClasses = "",
   disabled = false,
   variant = "secondary",
+  ref,
+  ...rest
 }: PropsWithChildren<ButtonProps>) => {
   return (
     <button
@@ -32,6 +36,8 @@ const Button = ({
       className={`${baseStyles} ${variants[variant]} ${additionalClasses} ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
+      ref={ref}
+      {...rest}
     >
       {icon && icon}
       {children}

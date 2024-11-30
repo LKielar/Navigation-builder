@@ -13,7 +13,7 @@ const EmptyList = () => {
           </span>
         </div>
 
-        <Button colorVariant="primary" icon={<PlusCircleIcon />}>
+        <Button variant="primary" icon={<PlusCircleIcon />}>
           Dodaj pozycję menu
         </Button>
       </div>
