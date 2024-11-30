@@ -19,7 +19,11 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang="pl">
-      <body className={inter.variable}>{children}</body>
+      <body
+        className={`${inter.variable} bg-bg-main flex justify-center py-[30px] px-[20px]`}
+      >
+        {children}
+      </body>
     </html>
   );
 };
