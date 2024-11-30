@@ -9,6 +9,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        "bg-main": "#f5f5f5",
         "bg-primary": "#FFFFFF",
         "bg-secondary": "#F9FAFB",
         "fg-quaternary": "#667085",
@@ -37,6 +38,9 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif"],
+      },
+      borderWidth: {
+        DEFAULT: "1px",
       },
     },
   },
