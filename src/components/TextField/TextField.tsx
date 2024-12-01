@@ -1,29 +1,35 @@
 import { ErrorMessage } from "@hookform/error-message";
-import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  FieldValues,
+  Path,
+} from "react-hook-form";
 
-type TextFieldProps = {
+type TextFieldProps<T extends FieldValues> = {
   label: string;
-  name: string;
+  name: Path<T>;
+  control: Control<T>;
   placeholder?: string;
   startIcon?: React.ReactNode;
   className?: string;
   errors?: FieldErrors<FieldValues>;
-  register: UseFormRegister<FieldValues>;
 };
 
-const TextField = ({
+const TextField = <T extends FieldValues>({
   label,
   name,
+  control,
   placeholder,
   startIcon,
   className = "",
   errors,
-  register,
-}: TextFieldProps) => {
+}: TextFieldProps<T>) => {
   const isError = errors && Object.keys(errors).some((val) => val === name);
 
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
+    <div className={`flex flex-col gap-[6px] ${className}`}>
       <label htmlFor={name} className="text-sm font-medium text-text-secondary">
         {label}
       </label>
@@ -31,15 +37,21 @@ const TextField = ({
       <div className="relative flex items-center">
         {startIcon && <div className="absolute left-3">{startIcon}</div>}
 
-        <input
-          {...register(name)}
-          id={name}
-          placeholder={placeholder}
-          className={`pl-${
-            startIcon ? "10" : "3"
-          } border border-border-primary rounded-lg shadow-sm w-full py-2 px-3 ${
-            isError ? "border-red-500" : ""
-          }`}
+        <Controller
+          name={name}
+          control={control}
+          render={({ field }) => {
+            return (
+              <input
+                id={field.name}
+                placeholder={placeholder}
+                className={`border border-border-primary rounded-lg shadow-sm w-full py-2 px-3 placeholder:text-text-placeholder ${
+                  isError ? "border-red-500" : ""
+                } ${startIcon && "pl-10"}`}
+                {...field}
+              />
+            );
+          }}
         />
       </div>
 

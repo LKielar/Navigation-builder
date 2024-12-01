@@ -7,19 +7,26 @@ import Button from "@/components/Button";
 import ItemsList from "@/components/ItemsList";
 import ListItem from "@/components/ListItem";
 import { IListItem, IListItems } from "@/types/global";
+import ItemForm from "../components/ItemForm";
+import EmptyList from "@/components/EmptyList";
+import { ItemFormValues } from "@/types/itemFormValues";
 
 const DashboardView = () => {
   const [items, setItems] = useState<IListItems>([]);
+  const [isNewItemFormOpen, setIsNewItemFormOpen] = useState<{
+    itemType?: "sibling" | "child";
+  } | null>(null);
 
-  const addSibling = () => {
+  const addSibling = (values: ItemFormValues) => {
     const newItem = {
       id: String(Date.now()),
-      label: "Nowa pozycja",
-      url: "",
+      label: values.label,
+      url: values.url,
       children: [],
     };
 
     setItems((prevItems) => [...prevItems, newItem]);
+    setIsNewItemFormOpen(null);
   };
 
   const addChild = (parentId: string) => {
@@ -69,15 +76,41 @@ const DashboardView = () => {
 
   return (
     <div className="rounded-lg border-border-primary border-solid border w-[100%] max-w-6xl overflow-hidden">
-      <ItemsList
-        items={items}
-        onChange={setItems}
-        renderItem={(item) => renderItem(item)}
-      />
+      {items.length === 0 ? (
+        !isNewItemFormOpen ? (
+          <EmptyList
+            onItemFormOpen={() => setIsNewItemFormOpen({ itemType: "sibling" })}
+          />
+        ) : (
+          <ItemForm
+            onFormSubmit={addSibling}
+            onClose={() => setIsNewItemFormOpen(null)}
+          />
+        )
+      ) : (
+        <>
+          <ItemsList
+            items={items}
+            onChange={setItems}
+            renderItem={(item) => renderItem(item)}
+          />
 
-      <div className="p-4">
-        <Button onClick={addSibling}>Dodaj pozycję menu</Button>
-      </div>
+          {!!isNewItemFormOpen && (
+            <ItemForm
+              onFormSubmit={addSibling}
+              onClose={() => setIsNewItemFormOpen(null)}
+            />
+          )}
+
+          <div className="p-4">
+            <Button
+              onClick={() => setIsNewItemFormOpen({ itemType: "sibling" })}
+            >
+              Dodaj pozycję menu
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

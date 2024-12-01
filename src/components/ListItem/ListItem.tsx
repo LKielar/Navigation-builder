@@ -16,7 +16,13 @@ export const DragField = () => {
   const { attributes, listeners, ref } = useContext(SortableItemContext);
 
   return (
-    <Button {...attributes} {...listeners} ref={ref} variant="icon">
+    <Button
+      {...attributes}
+      {...listeners}
+      ref={ref}
+      variant="icon"
+      additionalClasses="cursor-move"
+    >
       <DragDropIcon />
     </Button>
   );

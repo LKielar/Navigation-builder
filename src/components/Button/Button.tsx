@@ -1,42 +1,42 @@
-import { PropsWithChildren } from "react";
+import {
+  ButtonHTMLAttributes,
+  DetailedHTMLProps,
+  PropsWithChildren,
+} from "react";
 
-const baseStyles = `flex items-center gap-[6px] font-semibold text-sm py-[10px] px-4 border border-solid rounded-md whitespace-nowrap transition hover:bg-opacity-95 w-fit shadow-sm`;
+const baseStyles = `flex items-center gap-[6px] font-semibold text-sm py-[10px] px-4 border border-solid rounded-md whitespace-nowrap transition w-fit`;
 
 const variants = {
   primary:
-    "text-button-primary-fg bg-button-primary-bg border-button-primary-border",
+    "text-button-primary-fg bg-button-primary-bg border-button-primary-border shadow-sm hover:bg-opacity-90",
   secondary:
-    "text-button-secondary-fg bg-button-secondary-bg border-button-secondary-border",
-  icon: "bg-none border-none p-[10px] rounded-md h-fit shadow-none",
+    "text-button-secondary-fg bg-button-secondary-bg border-button-secondary-border shadow-sm hover:bg-bg-secondary",
+  textPrimary:
+    "text-button-secondary-color-fg bg-button-secondary-bg border-button-primary-border shadow-sm hover:bg-bg-secondary",
+  icon: "bg-none border-none p-[10px] rounded-md h-fit",
 };
 
-type ButtonProps = {
-  variant?: "primary" | "secondary" | "icon";
-  onClick?: () => void;
+type ButtonProps = DetailedHTMLProps<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLButtonElement
+> & {
+  variant?: "primary" | "secondary" | "textPrimary" | "icon";
   icon?: React.ReactNode;
   additionalClasses?: string;
-  disabled?: boolean;
-  ref?: (node: HTMLElement | null) => void;
 };
 
 const Button = ({
   children,
-  onClick,
   icon,
   additionalClasses = "",
-  disabled = false,
   variant = "secondary",
-  ref,
   ...rest
 }: PropsWithChildren<ButtonProps>) => {
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
       className={`${baseStyles} ${variants[variant]} ${additionalClasses} ${
-        disabled ? "opacity-50 cursor-not-allowed" : ""
+        rest.disabled ? "opacity-50 pointer-events-none" : ""
       }`}
-      ref={ref}
       {...rest}
     >
       {icon && icon}
