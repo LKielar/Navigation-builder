@@ -1,7 +1,11 @@
 import PlusCircleIcon from "@/assets/PlusCircleIcon.svg";
 import Button from "../Button";
 
-const EmptyList = () => {
+type Props = {
+  onItemFormOpen?: () => void;
+};
+
+const EmptyList = ({ onItemFormOpen }: Props) => {
   return (
     <div className="bg-bg-secondary rounded-md border border-solid border-border-secondary w-[100%] max-w-6xl py-[30px] px-[20px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-6">
@@ -13,7 +17,11 @@ const EmptyList = () => {
           </span>
         </div>
 
-        <Button variant="primary" icon={<PlusCircleIcon />}>
+        <Button
+          variant="primary"
+          icon={<PlusCircleIcon />}
+          onClick={onItemFormOpen}
+        >
           Dodaj pozycję menu
         </Button>
       </div>
