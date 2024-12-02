@@ -77,6 +77,9 @@ export const ItemActions = ({
 
 type ListItemProps = {
   id: string;
+  isRootItem?: boolean;
+  hasSiblingWithChildren?: boolean;
+  hasChildren?: boolean;
 };
 
 type Context = {
@@ -91,7 +94,13 @@ const SortableItemContext = createContext<Context>({
   ref: () => {},
 });
 
-const ListItem = ({ children, id }: PropsWithChildren<ListItemProps>) => {
+const ListItem = ({
+  children,
+  id,
+  isRootItem = false,
+  hasSiblingWithChildren,
+  hasChildren,
+}: PropsWithChildren<ListItemProps>) => {
   const {
     attributes,
     isDragging,
@@ -120,7 +129,11 @@ const ListItem = ({ children, id }: PropsWithChildren<ListItemProps>) => {
   return (
     <SortableItemContext.Provider value={context}>
       <li
-        className="flex items-center gap-1 px-5 py-[18px] bg-white border-border-secondary border-solid border-b list-none text-gray-800 font-normal text-base font-sans"
+        className={`flex items-center gap-1 px-[24px] py-[20px] bg-white border-b border-border-secondary border-solid first:border-b last:border-b-0 ${
+          !isRootItem && "border-l"
+        } ${
+          hasChildren && !isRootItem ? "rounded-bl-lg" : "last:rounded-bl-lg"
+        } ${hasSiblingWithChildren && "border-t"}`}
         ref={setNodeRef}
         style={style}
       >
