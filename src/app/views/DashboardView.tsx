@@ -1,7 +1,7 @@
 "use client";
 
 import { DragField, ItemActions } from "@/components/ListItem/ListItem";
-import React from "react";
+import React, { useCallback } from "react";
 import { useState } from "react";
 import Button from "@/components/Button";
 import ItemsList from "@/components/ItemsList";
@@ -87,9 +87,32 @@ const DashboardView = () => {
     setEditedItem(null);
   };
 
+  const computeSiblingFlags = useCallback((items: IListItem[]): IListItem[] => {
+    return items.map((item, index) => {
+      const hasSiblingWithChildren = items
+        .slice(0, index)
+        .some((sibling) => sibling.children && sibling.children.length > 0);
+
+      const childrenWithFlags = item.children
+        ? computeSiblingFlags(item.children)
+        : [];
+
+      return {
+        ...item,
+        hasSiblingWithChildren,
+        children: childrenWithFlags,
+      };
+    });
+  }, []);
+
   const renderItem = (item: IListItem, depth = 0) => (
     <React.Fragment key={item.id}>
-      <ListItem id={item.id}>
+      <ListItem
+        id={item.id}
+        isRootItem={depth === 0}
+        hasSiblingWithChildren={item.hasSiblingWithChildren}
+        hasChildren={item.children.length > 0}
+      >
         <DragField />
 
         <ItemActions
@@ -125,7 +148,9 @@ const DashboardView = () => {
             );
           }}
           renderItem={(childItem) => renderItem(childItem, depth + 1)}
-          className={`pl-16`}
+          className={`pl-16 ${
+            depth > 0 && item.children.length === 0 && "border-none"
+          }`}
         />
       )}
 
@@ -137,6 +162,8 @@ const DashboardView = () => {
       )}
     </React.Fragment>
   );
+
+  const itemsWithFlags = computeSiblingFlags(items);
 
   return (
     <div className="rounded-lg border-border-primary border-solid border w-[100%] max-w-6xl overflow-hidden">
@@ -155,7 +182,7 @@ const DashboardView = () => {
       ) : (
         <>
           <ItemsList
-            items={items}
+            items={itemsWithFlags}
             onChange={setItems}
             renderItem={(item) => renderItem(item)}
           />
@@ -169,7 +196,7 @@ const DashboardView = () => {
               onClose={() => setIsAdding(false)}
             />
           ) : (
-            <div className="p-4">
+            <div className="p-4 border-t border-border-secondary border-solid">
               <Button
                 onClick={() => {
                   setIsAdding(true);

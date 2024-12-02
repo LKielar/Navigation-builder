@@ -66,9 +66,7 @@ const ItemsList = ({
       id={useId()} // id must be passed to fix SSR hydration error
     >
       <SortableContext items={items}>
-        <ul
-          className={`list-none bg-bg-secondary flex flex-col first:border-none ${className}`}
-        >
+        <ul className={`list-none bg-bg-secondary flex flex-col ${className}`}>
           {items.map((item) => (
             <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
           ))}
