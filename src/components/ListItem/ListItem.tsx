@@ -31,9 +31,16 @@ export const DragField = () => {
 type ItemActionsProps = {
   item: IListItem;
   onAddChild: () => void;
+  onItemDelete: () => void;
+  onItemEdit: () => void;
 };
 
-export const ItemActions = ({ item, onAddChild }: ItemActionsProps) => (
+export const ItemActions = ({
+  item,
+  onAddChild,
+  onItemDelete,
+  onItemEdit,
+}: ItemActionsProps) => (
   <div className="flex justify-between w-full">
     <div className="flex flex-col gap-[6px] w-full">
       <span className="text-text-primary text-sm font-semibold">
@@ -44,11 +51,17 @@ export const ItemActions = ({ item, onAddChild }: ItemActionsProps) => (
     </div>
 
     <div className="flex ">
-      <button className="text-text-secondary font-semibold py-[10px] px-4 border border-border-primary border-solid border-r-0 rounded-bl-md rounded-tl-md">
+      <button
+        className="text-text-secondary font-semibold py-[10px] px-4 border border-border-primary border-solid border-r-0 rounded-bl-md rounded-tl-md"
+        onClick={onItemDelete}
+      >
         Usuń
       </button>
 
-      <button className="text-text-secondary font-semibold py-[10px] px-4 border border-border-primary border-solid">
+      <button
+        className="text-text-secondary font-semibold py-[10px] px-4 border border-border-primary border-solid"
+        onClick={onItemEdit}
+      >
         Edytuj
       </button>
 

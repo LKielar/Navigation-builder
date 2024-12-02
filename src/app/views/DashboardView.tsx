@@ -7,17 +7,51 @@ import Button from "@/components/Button";
 import ItemsList from "@/components/ItemsList";
 import ListItem from "@/components/ListItem";
 import { IListItem, IListItems } from "@/types/global";
-import ItemForm from "../components/ItemForm";
 import EmptyList from "@/components/EmptyList";
 import { ItemFormValues } from "@/types/itemFormValues";
+import EditItemForm from "../components/Forms/EditItemForm";
+import AddItemForm from "../components/Forms/AddItemForm";
 
 const DashboardView = () => {
   const [items, setItems] = useState<IListItems>([]);
-  const [isNewItemFormOpen, setIsNewItemFormOpen] = useState<{
-    itemType?: "sibling" | "child";
-  } | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newItemParentId, setNewItemParentId] = useState<string | null>(null);
+  const [editedItem, setEditedItem] = useState<IListItem | null>(null);
 
-  const addSibling = (values: ItemFormValues) => {
+  const deleteItem = (itemId: string) => {
+    const removeItem = (items: IListItem[]): IListItem[] =>
+      items
+        .filter((item) => item.id !== itemId)
+        .map((item) => ({
+          ...item,
+          children: item.children ? removeItem(item.children) : [],
+        }));
+
+    setItems((prevItems) => removeItem(prevItems));
+  };
+
+  const editItem = (itemId: string) => {
+    const findItemById = (items: IListItems): IListItem | null => {
+      for (const item of items) {
+        if (item.id === itemId) return item;
+
+        const childResult = findItemById(item.children);
+        if (childResult) return childResult;
+      }
+      return null;
+    };
+
+    const itemToEdit = findItemById(items);
+    if (itemToEdit) {
+      setEditedItem(itemToEdit);
+    }
+  };
+
+  const addNewItemToParent = (parentId: string | null) => {
+    setNewItemParentId(parentId);
+  };
+
+  const addItem = (parentId: string | null, values: ItemFormValues) => {
     const newItem = {
       id: String(Date.now()),
       label: values.label,
@@ -25,26 +59,32 @@ const DashboardView = () => {
       children: [],
     };
 
-    setItems((prevItems) => [...prevItems, newItem]);
-    setIsNewItemFormOpen(null);
+    if (parentId === null) {
+      setItems((prevItems) => [...prevItems, newItem]);
+    } else {
+      const addChildToItems = (items: IListItems): IListItems =>
+        items.map((item) =>
+          item.id === parentId
+            ? { ...item, children: [...item.children, newItem] }
+            : { ...item, children: addChildToItems(item.children) }
+        );
+
+      setItems((prevItems) => addChildToItems(prevItems));
+    }
+
+    setNewItemParentId(null);
   };
 
-  const addChild = (parentId: string) => {
-    const newItem = {
-      id: String(Date.now()),
-      label: "Nowe dziecko",
-      url: "",
-      children: [],
-    };
-
-    const addChildToItems = (items: IListItems): IListItems =>
+  const updateItem = (values: ItemFormValues) => {
+    const updateItemById = (items: IListItems): IListItems =>
       items.map((item) =>
-        item.id === parentId
-          ? { ...item, children: [...item.children, newItem] }
-          : { ...item, children: addChildToItems(item.children) }
+        item.id === editedItem?.id
+          ? { ...item, label: values.label, url: values.url }
+          : { ...item, children: updateItemById(item.children) }
       );
 
-    setItems((prevItems) => addChildToItems(prevItems));
+    setItems((prevItems) => updateItemById(prevItems));
+    setEditedItem(null);
   };
 
   const renderItem = (item: IListItem, depth = 0) => (
@@ -52,8 +92,25 @@ const DashboardView = () => {
       <ListItem id={item.id}>
         <DragField />
 
-        <ItemActions item={item} onAddChild={() => addChild(item.id)} />
+        <ItemActions
+          item={item}
+          onAddChild={() => addNewItemToParent(item.id)}
+          onItemDelete={() => deleteItem(item.id)}
+          onItemEdit={() => editItem(item.id)}
+        />
       </ListItem>
+
+      {editedItem?.id === item.id && (
+        <EditItemForm
+          onFormSubmit={updateItem}
+          onClose={() => setEditedItem(null)}
+          initialValues={{
+            label: editedItem.label,
+            url: editedItem.url,
+          }}
+          onDelete={() => deleteItem(editedItem.id)}
+        />
+      )}
 
       {item.children && item.children.length > 0 && (
         <ItemsList
@@ -71,21 +128,29 @@ const DashboardView = () => {
           className={`pl-16`}
         />
       )}
+
+      {newItemParentId === item.id && (
+        <AddItemForm
+          onFormSubmit={(values) => addItem(item.id, values)}
+          onClose={() => setNewItemParentId(null)}
+        />
+      )}
     </React.Fragment>
   );
 
   return (
     <div className="rounded-lg border-border-primary border-solid border w-[100%] max-w-6xl overflow-hidden">
       {items.length === 0 ? (
-        !isNewItemFormOpen ? (
-          <EmptyList
-            onItemFormOpen={() => setIsNewItemFormOpen({ itemType: "sibling" })}
+        isAdding ? (
+          <AddItemForm
+            onFormSubmit={(values) => {
+              addItem(null, values);
+              setIsAdding(false);
+            }}
+            onClose={() => setIsAdding(false)}
           />
         ) : (
-          <ItemForm
-            onFormSubmit={addSibling}
-            onClose={() => setIsNewItemFormOpen(null)}
-          />
+          <EmptyList onItemFormOpen={() => setIsAdding(true)} />
         )
       ) : (
         <>
@@ -95,20 +160,26 @@ const DashboardView = () => {
             renderItem={(item) => renderItem(item)}
           />
 
-          {!!isNewItemFormOpen && (
-            <ItemForm
-              onFormSubmit={addSibling}
-              onClose={() => setIsNewItemFormOpen(null)}
+          {isAdding && newItemParentId === null ? (
+            <AddItemForm
+              onFormSubmit={(values) => {
+                addItem(null, values);
+                setIsAdding(false);
+              }}
+              onClose={() => setIsAdding(false)}
             />
+          ) : (
+            <div className="p-4">
+              <Button
+                onClick={() => {
+                  setIsAdding(true);
+                  setNewItemParentId(null);
+                }}
+              >
+                Dodaj pozycję menu
+              </Button>
+            </div>
           )}
-
-          <div className="p-4">
-            <Button
-              onClick={() => setIsNewItemFormOpen({ itemType: "sibling" })}
-            >
-              Dodaj pozycję menu
-            </Button>
-          </div>
         </>
       )}
     </div>
