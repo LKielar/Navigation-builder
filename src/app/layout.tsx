@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Next-Navigation",
+  title: "Navigation-Builder",
 };
 
 const RootLayout = ({

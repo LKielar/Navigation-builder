@@ -2,7 +2,7 @@ import React from "react";
 import { useForm, Control, FieldErrors } from "react-hook-form";
 import TrashIcon from "@/assets/TrashIcon.svg";
 import MagnifierIcon from "@/assets/MagnifierIcon.svg";
-import TextField from "../../../components/TextField/TextField";
+import TextField from "../../../components/TextField";
 import Button from "@/components/Button";
 import { ItemFormValues } from "@/types/itemFormValues";
 
