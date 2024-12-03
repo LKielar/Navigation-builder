@@ -16,9 +16,11 @@ import {
 } from "@dnd-kit/sortable";
 import DropArea from "../DropArea";
 import { IListItem, IListItems } from "@/types/global";
+import { useUniqueId } from "@dnd-kit/utilities";
 
 type ItemsListProps = {
   items: IListItems;
+  itemsTree: IListItems;
   onChange: (items: IListItems) => void;
   renderItem: (item: IListItem) => ReactNode;
   className?: string;
@@ -26,6 +28,7 @@ type ItemsListProps = {
 
 const ItemsList = ({
   items,
+  itemsTree,
   onChange,
   renderItem,
   className,
@@ -45,6 +48,57 @@ const ItemsList = ({
     })
   );
 
+  const swapItemsInTree = (
+    tree: IListItems,
+    activeId: string,
+    overId: string
+  ): IListItems => {
+    const updateTree = (currentTree: IListItems): IListItems => {
+      const activeIndex = currentTree.findIndex((item) => item.id === activeId);
+      const overIndex = currentTree.findIndex((item) => item.id === overId);
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        return arrayMove(currentTree, activeIndex, overIndex);
+      }
+
+      return currentTree.map((item) => {
+        if (item.children) {
+          const updatedChildren = updateTree(item.children);
+          return { ...item, children: updatedChildren };
+        }
+        return item;
+      });
+    };
+
+    const swapItems = (
+      currentTree: IListItems,
+      id1: string,
+      id2: string
+    ): IListItems => {
+      return currentTree.map((item) => {
+        if (item.children) {
+          const childIds = item.children.map((child) => child.id);
+
+          if (childIds.includes(id1) && childIds.includes(id2)) {
+            const childActiveIndex = childIds.indexOf(id1);
+            const childOverIndex = childIds.indexOf(id2);
+            const swappedChildren = arrayMove(
+              item.children,
+              childActiveIndex,
+              childOverIndex
+            );
+            return { ...item, children: swappedChildren };
+          }
+
+          return { ...item, children: swapItems(item.children, id1, id2) };
+        }
+        return item;
+      });
+    };
+
+    return updateTree(tree);
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -53,17 +107,20 @@ const ItemsList = ({
       }}
       onDragEnd={({ active, over }) => {
         if (over && active.id !== over.id) {
-          const activeIndex = items.findIndex(({ id }) => id === active.id);
-          const overIndex = items.findIndex(({ id }) => id === over.id);
+          const updatedTree = swapItemsInTree(
+            itemsTree,
+            active.id as string,
+            over.id as string
+          );
 
-          onChange(arrayMove(items, activeIndex, overIndex));
+          onChange(updatedTree);
         }
         setActive(null);
       }}
       onDragCancel={() => {
         setActive(null);
       }}
-      id={useId()} // id must be passed to fix SSR hydration error
+      id={useUniqueId(useId())} // id must be passed to fix SSR hydration error
     >
       <SortableContext items={items}>
         <ul className={`list-none bg-bg-secondary flex flex-col ${className}`}>

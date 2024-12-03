@@ -138,15 +138,8 @@ const DashboardView = () => {
       {item.children && item.children.length > 0 && (
         <ItemsList
           items={item.children}
-          onChange={(newChildren) => {
-            setItems((prevItems) =>
-              prevItems.map((prevItem) =>
-                prevItem.id === item.id
-                  ? { ...prevItem, children: newChildren }
-                  : prevItem
-              )
-            );
-          }}
+          itemsTree={items}
+          onChange={setItems}
           renderItem={(childItem) => renderItem(childItem, depth + 1)}
           className={`pl-16 ${
             depth > 0 && item.children.length === 0 && "border-none"
@@ -183,6 +176,7 @@ const DashboardView = () => {
         <>
           <ItemsList
             items={itemsWithFlags}
+            itemsTree={itemsWithFlags}
             onChange={setItems}
             renderItem={(item) => renderItem(item)}
           />
